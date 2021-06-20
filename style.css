@@ -9,9 +9,6 @@ body {
 }
 
 #scoreboard {
-	max-width: 1440px;
-	margin: auto 0;
-
 	padding: 10px;
 	font-size: 36px;
 	text-align: center;
