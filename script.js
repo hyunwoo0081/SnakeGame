@@ -34,36 +34,29 @@ function init(){
 	}
 
 	window.addEventListener("keydown", e => {
-		if(!isPlay){
-			newGame();
-		}
-		else{
-			switch(e.keyCode){
-				case 38: //up
-					if(nowDiraction[1] == 0){
-						nextDiraction[0] = 0;
-						nextDiraction[1] = -1;
-					}
-					break;
-				case 40: //down
-					if(nowDiraction[1] == 0){
-						nextDiraction[0] = 0;
-						nextDiraction[1] = 1;
-					}
-					break;
-				case 37: //left
-					if(nowDiraction[0] == 0){
-						nextDiraction[0] = -1;
-						nextDiraction[1] = 0;
-					}
-					break;
-				case 39: //right
-					if(nowDiraction[0] == 0){
-						nextDiraction[0] = 1;
-						nextDiraction[1] = 0;
-					}
-					break;
-			}
+		if(!isPlay)	return newGame();
+		
+		switch(e.keyCode){
+			case 38: //up
+				if(nowDiraction[1] == 0){
+					nextDiraction = [0, -1];
+				}
+				break;
+			case 40: //down
+				if(nowDiraction[1] == 0){
+					nextDiraction = [0, 1];
+				}
+				break;
+			case 37: //left
+				if(nowDiraction[0] == 0){
+					nextDiraction = [-1, 0];
+				}
+				break;
+			case 39: //right
+				if(nowDiraction[0] == 0){
+					nextDiraction = [1, 0];
+				}
+				break;
 		}
 	});
 }
@@ -74,8 +67,7 @@ function newGame(){
 		popSnake();
 	}
 	if(applePos[0] != 0){
-		playgrond.childNodes[applePos[1]].childNodes[applePos[0]]
-			.classList.remove("apple");
+		getClassList(...applePos).remove("apple");
 	}
 
 	isPlay = true;
@@ -100,19 +92,18 @@ function LoseGame(){
 function doAction(){
 	if(!isPlay) return;
 
-	nowDiraction[0] = nextDiraction[0];
-	nowDiraction[1] = nextDiraction[1];
+	nowDiraction = [...nextDiraction];
 
 	let x = queue[queueSize-1][0] + nowDiraction[0];
 	let y = queue[queueSize-1][1] + nowDiraction[1];
+	let nextStep = getClassList(x, y)[0];
 
-	let className = playground.childNodes[y].childNodes[x].classList[0];
-	if(className == "border" || className == "snake"){
+	if(nextStep === "border" || nextStep === "snake"){
 		LoseGame();
 		return;
 	}
-	else if(className == "apple"){
-		playground.childNodes[y].childNodes[x].classList.remove("apple");	
+	else if(nextStep === "apple"){
+		getClassList(x, y).remove("apple");	
 		createApple();
 		score += SCORE_APPLE;
 	}
@@ -126,7 +117,7 @@ function doAction(){
 }
 
 function addSnake(x, y){
-	playground.childNodes[y].childNodes[x].classList.add("snake");
+	getClassList(x, y).add("snake");
 	queue.push([x,y]);
 	queueSize++;
 }
@@ -134,24 +125,23 @@ function addSnake(x, y){
 function popSnake(){
 	let position = queue.shift();
 	queueSize--;
-	let x = position[0];
-	let y = position[1];
-	playground.childNodes[y].childNodes[x].classList.remove("snake");
+	getClassList(...position).remove("snake");
 }
 
 function createApple(){
-	let appleX, appleY;
+	let appleX, appleY, appleSpace;
 
 	do{
 		appleX = Math.floor(Math.random()*(GAME_WIDTH-2)) + 1;
 		appleY = Math.floor(Math.random()*(GAME_HEIGHT-2)) + 2;
-	}while(playground.childNodes[appleY].childNodes[appleX].classList[0] !== undefined);
 
-	applePos[0] = appleX;
-	applePos[1] = appleY;
+		appleSpace = getClassList(appleX, appleY)[0];
+	}while(appleSpace !== undefined);
 
-	console.log("apple position :" + applePos);
-
-	playgrond.childNodes[appleY].childNodes[appleX].classList.add("apple");
+	applePos = [appleX, appleY];
+	getClassList(...applePos).add("apple");
 }
 
+function getClassList(x, y){
+	return playgrond.childNodes[y].childNodes[x].classList;
+}
